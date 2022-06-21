@@ -1,7 +1,24 @@
 import pygame
 from sys import exit # to savely close the game
 from random import randint
-from Player import Player
+
+# class Player(pygame.sprite.Sprite):
+#     def __init__(self):
+#         super().__init__()
+#         self.image = pygame.Surface((20,20))
+#         self.rect = self.image.get_rect(topleft=arena_rect.center)
+    
+#     def player_input(self):
+#         keys = pygame.key.get_pressed()
+#         match event.key:
+#             case pygame.K_UP:
+#                 head_rect.y -= snake_block
+#             case pygame.K_DOWN:
+#                 head_rect.y += snake_block
+#             case pygame.K_LEFT:
+#                 head_rect.x -= snake_block
+#             case pygame.K_RIGHT:
+#                 head_rect.x += snake_block
 
 
 def display_time_score():
@@ -18,7 +35,7 @@ def display_score():
     score_rect = score_surf.get_rect(topleft=(40, score_text_rect.bottom+20))
     screen.blit(score_surf, score_rect)
 
-def move_food(head_rect):
+def move_food():
     '''moves the food to a free spot on the map'''
     x_corr = randint(10, 59)*20
     y_corr = randint(0,49)*20
@@ -27,6 +44,26 @@ def move_food(head_rect):
         x_corr = randint(10, 59)*20
         y_corr = randint(0,49)*20
     food_rect.update(x_corr,y_corr,food_rect.width, food_rect.height)
+
+def create_bodypart():
+    '''adds another body part to the snake depending on the position of the last body part or head'''
+    
+    # get corr of the last body
+    x_corr = body_rect_list[-1].center[0]
+    y_corr = body_rect_list[-1].center[1] + 20
+    # determen where to add the body
+    body_rect_list.append(head_surf.get_rect(center=(x_corr, y_corr)))
+    print("body part added", body_rect_list[-1].center)
+
+def snake_movement(body_rect_list):
+    '''moves the whole snake further depending on the direction and shows the elements on screen'''
+
+    for body_rect in body_rect_list:
+        body_rect.x += x1_change
+        body_rect.y += y1_change
+    return body_rect_list
+
+        
 
 # basically inistializes the pygame module
 pygame.init()
@@ -49,7 +86,9 @@ start_time = 0
 time = 0
 # score of one game
 score = 0
-
+# important for movement
+x1_change = 0
+y1_change = 0
 # determine how fast the snake is (later for difficulty?)
 snake_speed = 100
 
@@ -71,9 +110,14 @@ arena_surf.fill((150,150,150))
 # border_top_surf.fill('Gold')
 # screen.blit(border_top_surf, border_top_rect)
 
-# player
-player = Player(arena_rect, snake_block)
 
+# palyer
+head_surf = pygame.Surface((snake_block,snake_block))
+head_rect = head_surf.get_rect(topleft=arena_rect.center)
+head_surf.fill('Black')
+
+body_rect_list = []
+body_rect_list.append(head_rect)
 
 
 # food
@@ -104,7 +148,6 @@ move_timer = pygame.USEREVENT + 2
 pygame.time.set_timer(move_timer, snake_speed)
 
 
-
 while True:
     # this while loop shoulnd run faster than 60x per second (so max frame rate is 60)
     clock.tick(60)
@@ -112,7 +155,6 @@ while True:
     for event in pygame.event.get():
         # so one can close the window with x-button
         if event.type == pygame.QUIT:
-            
             # kinda the opposit of pygame.init()
             pygame.quit()
             # close the code savely
@@ -120,29 +162,54 @@ while True:
         
         # movement
         if game_active:
-            player.input()
+            if event.type == pygame.KEYDOWN:
+                match event.key:
+                    case pygame.K_UP:
+                        #head_rect.y -= snake_block
+                        y1_change = -20
+                        x1_change = 0
+                    case pygame.K_DOWN:
+                        #head_rect.y += snake_block
+                        y1_change = 20
+                        x1_change = 0
+                    case pygame.K_LEFT:
+                        #head_rect.x -= snake_block
+                        x1_change = -20
+                        y1_change = 0
+                    case pygame.K_RIGHT:
+                        #head_rect.x += snake_block
+                        x1_change = 20
+                        y1_change = 0
+                    #additional option to close the game
+                    case pygame.K_x:
+                        pygame.quit()
+                        exit()
+                #print(head_rect.center)
 
             # movement timer
             if event.type == move_timer:
                 # actually get the snake moving
-                player.move()
-                # check if the game is lost (doing it here cause just after movement one need to check the collision)
-                game_active = player.collosion(arena_rect)
+                body_rect_list = snake_movement(body_rect_list)
                 
+
 
             # power up timer
             if event.type == power_timer:
                 print("test")
             
+
         # input for menu
         else:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 # reset snake position
-                player.head_rect.update(720,500,player.head_rect.width, player.head_rect.height)
+                head_rect.update(720,500,head_rect.width, head_rect.height)
                 game_active = True
                 
                 # needed to reset the time score of the game
                 start_time = int(pygame.time.get_ticks() / 1000)
+        
+
+
     
     # active game
     if game_active:
@@ -151,19 +218,24 @@ while True:
         legend_surf.blit(time_surf, time_rect)
         screen.blit(legend_surf,legend_rect)
         screen.blit(arena_surf, arena_rect)
-        # add player
-        player.draw(screen)
-
+        #screen.blit(head_surf, head_rect)
+        for body_rect in body_rect_list:
+            screen.blit(head_surf,body_rect)
+            #print(body_rect.center)
         screen.blit(food_surf, food_rect)
         time = display_time_score()
         display_score()
 
         
         # check if snake hit the food
-        if food_rect.colliderect(player.head_rect):
+        if food_rect.colliderect(head_rect):
+            move_food()
             score += 1
-            player.create_bodypart(food_rect)
-            move_food(player.head_rect)
+            create_bodypart()
+
+        # check if the game is lost
+        if (not arena_rect.contains(head_rect)):
+            game_active = False
 
     # intro menue
     else:
@@ -176,6 +248,9 @@ while True:
         else:
             screen.blit(score_message_surf, score_message_rect)
             
+
+        
+
     # updates the screen(display surface)
     pygame.display.update()
 
