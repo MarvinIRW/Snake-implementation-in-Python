@@ -25,27 +25,19 @@ class Player():
     def input(self):
         '''function to monitor if the gamer did inputs relevant for the player'''
         keys = pygame.key.get_pressed()
-        # move up
         if keys[pygame.K_UP] or keys[pygame.K_w]:
-            # cant move in opposit direction
-            if self.y_change != 20:
-                self.x_change = 0
-                self.y_change = -20
-        # move down
+            self.x_change = 0
+            self.y_change = -20
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            # cant move in opposit direction
-            if self.y_change != -20:
-                self.x_change = 0
-                self.y_change = 20
+            self.x_change = 0
+            self.y_change = 20
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            if self.x_change != 20:
-                self.x_change = -20
-                self.y_change = 0
+            self.x_change = -20
+            self.y_change = 0
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            if self.x_change != -20:
-                self.x_change = 20
-                self.y_change = 0
-                
+            self.x_change = 20
+            self.y_change = 0
+        
 
     def create_bodypart(self, food_rect):
         '''adds another body part to the snake depending on the position of the just eaten food.
@@ -78,7 +70,7 @@ class Player():
             last_y = temp_y
         
 
-    def collosion(self, display):
+    def collosion(self, arena_rect, walls):
         '''checks if the player is still in bounds of arena and is not hitting it's own body
         
         args:
@@ -86,39 +78,23 @@ class Player():
         arena_rect -- Rect of the arena played in
         
         returns:
+
         bool if the gamestate is still active or not'''
         game_active = True
         # snake outside the arena?
-        if (not display.arena_rect.contains(self.head_rect)):
+        if (not arena_rect.contains(self.head_rect)):
             game_active = False
         # snake touching itself?
         for body in self.player_pos[1:]:
             if self.head_rect.center == body.center:
                 game_active = False
-        # snake touching walls?
-        index = self.head_rect.collidelist(display.wall_rects)
+        #snake touching walls?
+        wall_rects = [rect[1] for rect in walls]
+        index = self.head_rect.collidelist(wall_rects)
         if index >= 0:
-            print(display.wall_rects[index], "PLayer pos: " , self.head_rect)
+            print(wall_rects[index], "PLayer pos: " , self.head_rect)
             game_active = False
         return game_active
-
-    def eat(self, food, score, wall_rects):
-        '''checks if player is on food if so increases score makes a new bodypart and moves the food
-        
-        args:
-        
-        food -- instance of class food
-        score -- score of the game
-        wall_rects -- list of wall rects in arena
-        '''
-
-        if food.food_rect.colliderect(self.head_rect):
-            score += 1
-            self.create_bodypart(food.food_rect)
-            food.move(self.player_pos, wall_rects)
-            return score
-        return score
-        
 
     def draw(self, screen):
         '''draws the whole player on the screen
