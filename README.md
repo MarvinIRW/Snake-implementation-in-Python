@@ -27,3 +27,4 @@ Marvin Wurch
 ## Acknowledgments
 
 * [The ultimate introduction to Pygame](https://www.youtube.com/watch?v=AY9MnQ4x3zk)
+* [images for the snake and some displaying logic](https://github.com/clear-code-projects/Snake)
