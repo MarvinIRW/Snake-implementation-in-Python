@@ -8,19 +8,58 @@ class Player():
         # head looks different than body
         self.head_img = pygame.Surface((snake_size,snake_size))
         self.head_img.fill('Yellow')
-        self.head_rect = self.head_img.get_rect(topleft=arena_rect.center)
 
         # looks for body
         self.body_img = pygame.Surface((snake_size,snake_size))
         self.body_img.fill('Black')
 
-        # list with all the rects of the player (head always on index 0)
+        # list with all the rects of the player (head always on index 0) starting with two parts
         self.player_pos = []
-        self.player_pos.append(self.head_rect)
+        self.player_pos.append(self.head_img.get_rect(topleft=arena_rect.center))
+        self.player_pos.append(self.body_img.get_rect(topleft=(arena_rect.center)))
+        self.player_pos[0].update(720,500,self.player_pos[0].width, self.player_pos[0].height)
+        self.player_pos[1].update(720,520,self.player_pos[1].width, self.player_pos[1].height)
 
         # movement variabels
         self.x_change = 0
-        self.y_change = 0
+        self.y_change = -20
+
+        # snake images and resizing
+        self.head_up = pygame.image.load('images/head_up.png').convert_alpha()
+        self.head_up = pygame.transform.scale(self.head_up, (snake_size, snake_size))
+        self.head_down = pygame.image.load('images/head_down.png').convert_alpha()
+        self.head_down = pygame.transform.scale(self.head_down, (snake_size, snake_size))
+        self.head_right = pygame.image.load('images/head_right.png').convert_alpha()
+        self.head_right = pygame.transform.scale(self.head_right, (snake_size, snake_size))
+        self.head_left = pygame.image.load('images/head_left.png').convert_alpha()
+        self.head_left = pygame.transform.scale(self.head_left, (snake_size, snake_size))
+
+        self.tail_up = pygame.image.load('images/tail_up.png').convert_alpha()
+        self.tail_up = pygame.transform.scale(self.tail_up, (snake_size, snake_size))
+        self.tail_down = pygame.image.load('images/tail_down.png').convert_alpha()
+        self.tail_down = pygame.transform.scale(self.tail_down, (snake_size, snake_size))
+        self.tail_right = pygame.image.load('images/tail_right.png').convert_alpha()
+        self.tail_right = pygame.transform.scale(self.tail_right, (snake_size, snake_size))
+        self.tail_left = pygame.image.load('images/tail_left.png').convert_alpha()
+        self.tail_left = pygame.transform.scale(self.tail_left, (snake_size, snake_size))
+
+        self.body_vertical = pygame.image.load('images/body_vertical.png').convert_alpha()
+        self.body_vertical = pygame.transform.scale(self.body_vertical, (snake_size, snake_size))
+        self.body_horizontal = pygame.image.load('images/body_horizontal.png').convert_alpha()
+        self.body_horizontal = pygame.transform.scale(self.body_horizontal, (snake_size, snake_size))
+
+
+        self.body_tr = pygame.image.load('images/body_topright.png').convert_alpha()
+        self.body_tr = pygame.transform.scale(self.body_tr, (snake_size, snake_size))
+        self.body_tl = pygame.image.load('images/body_topleft.png').convert_alpha()
+        self.body_tl = pygame.transform.scale(self.body_tl, (snake_size, snake_size))
+        self.body_br = pygame.image.load('images/body_bottomright.png').convert_alpha()
+        self.body_br = pygame.transform.scale(self.body_br, (snake_size, snake_size))
+        self.body_bl = pygame.image.load('images/body_bottomleft.png').convert_alpha()
+        self.body_bl = pygame.transform.scale(self.body_bl, (snake_size, snake_size))
+
+        self.crunch_sound = pygame.mixer.Sound('sound/crunch.wav')
+
 
     def input(self):
         '''function to monitor if the gamer did inputs relevant for the player'''
@@ -46,7 +85,6 @@ class Player():
                 self.x_change = 20
                 self.y_change = 0
                 
-
     def create_bodypart(self, food_rect):
         '''adds another body part to the snake depending on the position of the just eaten food.
 
@@ -63,6 +101,8 @@ class Player():
 
     def move(self):
         '''moves the whole snake further depending on the direction'''
+        # print("pre move head x = ", self.player_pos[0].x)
+        # print("body1 x = ", self.player_pos[1].x)
         last_x = self.player_pos[0].x
         last_y = self.player_pos[0].y
         # head get's moved in moving direction
@@ -76,8 +116,9 @@ class Player():
             body.y = last_y
             last_x = temp_x
             last_y = temp_y
+        # print("after move head x = ", self.player_pos[0].x)
+        # print("body1 x = ", self.player_pos[1].x)
         
-
     def collosion(self, display):
         '''checks if the player is still in bounds of arena and is not hitting it's own body
         
@@ -89,17 +130,21 @@ class Player():
         bool if the gamestate is still active or not'''
         game_active = True
         # snake outside the arena?
-        if (not display.arena_rect.contains(self.head_rect)):
+        if (not display.arena_rect.contains(self.player_pos[0])):
             game_active = False
         # snake touching itself?
         for body in self.player_pos[1:]:
-            if self.head_rect.center == body.center:
+            if self.player_pos[0].center == body.center:
                 game_active = False
+                print("chrashed in body.")
+                # print("head x = ", self.player_pos[0].x)
+                # print("body1 x = ", body.x)
         # snake touching walls?
-        index = self.head_rect.collidelist(display.wall_rects)
+        index = self.player_pos[0].collidelist(display.wall_rects)
         if index >= 0:
-            print(display.wall_rects[index], "PLayer pos: " , self.head_rect)
+            print(display.wall_rects[index], "PLayer pos: " , self.player_pos[0])
             game_active = False
+            print("crashed in wall")
         return game_active
 
     def eat(self, food, score, wall_rects):
@@ -112,22 +157,78 @@ class Player():
         wall_rects -- list of wall rects in arena
         '''
 
-        if food.food_rect.colliderect(self.head_rect):
+        if food.food_rect.colliderect(self.player_pos[0]):
             score += 1
             self.create_bodypart(food.food_rect)
             food.move(self.player_pos, wall_rects)
+            self.play_curnchy()
             return score
         return score
         
-
     def draw(self, screen):
         '''draws the whole player on the screen
         
         args:
         
         screen -- surface (where the player should be drawn on)'''
-        
-        screen.blit(self.head_img, self.head_rect)
-        # and rest of body
-        for body in self.player_pos[1:]:
-            screen.blit(self.body_img,body)
+        self.update_head_image()
+        self.update_tail_image()
+        for index, part in enumerate(self.player_pos):
+            # what direction is head heading?
+            if index == 0:
+                screen.blit(self.head_curr,part)
+            # tail
+            elif index == len(self.player_pos) - 1:
+                screen.blit(self.tail_curr,part)
+            else:
+                previous_block_x = self.player_pos[index + 1].x - part.x
+                previous_block_y = self.player_pos[index + 1].y - part.y
+                next_block_x = self.player_pos[index - 1].x - part.x
+                next_block_y = self.player_pos[index - 1].y - part.y
+                if previous_block_x == next_block_x:
+                    # vertical block
+                    screen.blit(self.body_vertical, part)
+                elif previous_block_y == next_block_y:
+                    # horizontal block
+                    screen.blit(self.body_horizontal, part)
+                else:
+                    # corners
+                    if previous_block_x == -20 and next_block_y == -20 or previous_block_y == -20 and next_block_x == -20:
+                        screen.blit(self.body_tl, part)
+                    elif previous_block_x == -20 and next_block_y == 20 or previous_block_y == 20 and next_block_x == -20:
+                        screen.blit(self.body_bl, part)
+                    elif previous_block_x == 20 and next_block_y == -20 or previous_block_y == -20 and next_block_x == 20:
+                        screen.blit(self.body_tr, part)
+                    elif previous_block_x == 20 and next_block_y == 20 or previous_block_y == 20 and next_block_x == 20:
+                        screen.blit(self.body_br, part)
+
+    def update_tail_image(self):
+        '''selects the appropriate tail images depending on the current movement'''
+        x = self.player_pos[-2].x - self.player_pos[-1].x
+        y = self.player_pos[-2].y - self.player_pos[-1].y
+        # left
+        if (x == 20 and y == 0): self.tail_curr = self.tail_left
+        # right
+        elif (x == -20 and y == 0): self.tail_curr = self.tail_right
+        # up
+        elif (x == 0 and y == 20): self.tail_curr = self.tail_up
+        # down
+        elif (x == 0 and y == -20): self.tail_curr = self.tail_down
+
+    def update_head_image(self):
+
+        '''selects the appropriate head images depending on the current movement'''
+        x = self.player_pos[1].x - self.player_pos[0].x
+        y = self.player_pos[1].y - self.player_pos[0].y
+        # left
+        if (x == 20 and y == 0): self.head_curr = self.head_left
+        # right
+        elif (x == -20 and y == 0): self.head_curr = self.head_right
+        # up
+        elif (x == 0 and y == 20): self.head_curr = self.head_up
+        # down
+        elif (x == 0 and y == -20): self.head_curr = self.head_down
+
+    def play_curnchy(self):
+        '''plays a cunshing sound'''
+        self.crunch_sound.play()

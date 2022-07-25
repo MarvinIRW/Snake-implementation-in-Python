@@ -6,7 +6,9 @@ class Food():
     def __init__(self, screen, snake_size, body_rects, wall_rects):
         self.block_size = snake_size
         self.arena_width, self.arena_height = screen.get_size()
-        self.food_surf = pygame.Surface((snake_size,snake_size))
+        self.food_surf = pygame.image.load('images/apple.png').convert_alpha()
+        self.food_surf = pygame.transform.scale(self.food_surf, (snake_size, snake_size))
+        #self.food_surf = pygame.Surface((snake_size,snake_size))
         self.x_corr = randint(10, 59)*20
         self.y_corr = randint(0,49)*20
         self.food_rect = self.food_surf.get_rect(topleft=(self.x_corr, self.y_corr))
@@ -14,7 +16,7 @@ class Food():
             x_corr = randint(10, 59)*20
             y_corr = randint(0,49)*20
             self.food_rect.update(x_corr,y_corr, self.food_rect.width, self.food_rect.height)
-        self.food_surf.fill('Red')
+        #self.food_surf.fill('Red')
         
     def food_legal(self, body_rects, wall_rects):
         if self.food_rect.collidelist(body_rects) >= 0 or self.food_rect.collidelist(wall_rects) >= 0:
