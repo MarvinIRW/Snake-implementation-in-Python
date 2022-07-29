@@ -4,26 +4,21 @@ import pygame
 class Player():
     '''Class representing the snake'''
     def __init__(self, arena_rect, snake_size):
-        # for now just a surface, later maybe an actual image
         # head looks different than body
         self.head_img = pygame.Surface((snake_size,snake_size))
         self.head_img.fill('Yellow')
-
         # looks for body
         self.body_img = pygame.Surface((snake_size,snake_size))
         self.body_img.fill('Black')
-
         # list with all the rects of the player (head always on index 0) starting with two parts
         self.player_pos = []
         self.player_pos.append(self.head_img.get_rect(topleft=arena_rect.center))
         self.player_pos.append(self.body_img.get_rect(topleft=(arena_rect.center)))
         self.player_pos[0].update(720,500,self.player_pos[0].width, self.player_pos[0].height)
         self.player_pos[1].update(720,520,self.player_pos[1].width, self.player_pos[1].height)
-
         # movement variabels
         self.x_change = 0
         self.y_change = -20
-
         # snake images and resizing
         self.head_up = pygame.image.load('images/head_up.png').convert_alpha()
         self.head_up = pygame.transform.scale(self.head_up, (snake_size, snake_size))
@@ -48,7 +43,6 @@ class Player():
         self.body_horizontal = pygame.image.load('images/body_horizontal.png').convert_alpha()
         self.body_horizontal = pygame.transform.scale(self.body_horizontal, (snake_size, snake_size))
 
-
         self.body_tr = pygame.image.load('images/body_topright.png').convert_alpha()
         self.body_tr = pygame.transform.scale(self.body_tr, (snake_size, snake_size))
         self.body_tl = pygame.image.load('images/body_topleft.png').convert_alpha()
@@ -57,9 +51,6 @@ class Player():
         self.body_br = pygame.transform.scale(self.body_br, (snake_size, snake_size))
         self.body_bl = pygame.image.load('images/body_bottomleft.png').convert_alpha()
         self.body_bl = pygame.transform.scale(self.body_bl, (snake_size, snake_size))
-
-        self.crunch_sound = pygame.mixer.Sound('sound/crunch.wav')
-
 
     def input(self):
         '''function to monitor if the gamer did inputs relevant for the player'''
@@ -116,8 +107,6 @@ class Player():
             body.y = last_y
             last_x = temp_x
             last_y = temp_y
-        # print("after move head x = ", self.player_pos[0].x)
-        # print("body1 x = ", self.player_pos[1].x)
         
     def collosion(self, display):
         '''checks if the player is still in bounds of arena and is not hitting it's own body
@@ -137,8 +126,6 @@ class Player():
             if self.player_pos[0].center == body.center:
                 game_active = False
                 print("chrashed in body.")
-                # print("head x = ", self.player_pos[0].x)
-                # print("body1 x = ", body.x)
         # snake touching walls?
         index = self.player_pos[0].collidelist(display.wall_rects)
         if index >= 0:
@@ -146,24 +133,6 @@ class Player():
             game_active = False
             print("crashed in wall")
         return game_active
-
-    def eat(self, food, score, wall_rects):
-        '''checks if player is on food if so increases score makes a new bodypart and moves the food
-        
-        args:
-        
-        food -- instance of class food
-        score -- score of the game
-        wall_rects -- list of wall rects in arena
-        '''
-
-        if food.food_rect.colliderect(self.player_pos[0]):
-            score += 1
-            self.create_bodypart(food.food_rect)
-            food.move(self.player_pos, wall_rects)
-            self.play_curnchy()
-            return score
-        return score
         
     def draw(self, screen):
         '''draws the whole player on the screen
@@ -228,7 +197,3 @@ class Player():
         elif (x == 0 and y == 20): self.head_curr = self.head_up
         # down
         elif (x == 0 and y == -20): self.head_curr = self.head_down
-
-    def play_curnchy(self):
-        '''plays a cunshing sound'''
-        self.crunch_sound.play()
