@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from time import process_time_ns
 import pygame
 from sys import exit # to savely close the game
@@ -38,6 +39,13 @@ def initialization(map_selection, help_lines, snake_speed_local=100):
     # food
     global food
     food = Food(screen, snake_block, player.player_pos, display.wall_rects)
+    # power up
+    global power_up
+    del power_up
+    global power_on
+    power_on = False
+
+
 
     # move the player to approximately the middle 
     player.player_pos[0].update(720,500,player.player_pos[0].width, player.player_pos[0].height)
@@ -86,6 +94,7 @@ player = Player(display.arena_rect, snake_block)
 # food
 food = Food(screen, snake_block, player.player_pos, display.wall_rects)
 # powerup
+power_up = PowerUp(snake_block)
 power_on = False
 
 
