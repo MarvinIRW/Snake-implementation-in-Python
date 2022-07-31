@@ -4,6 +4,12 @@ import pygame
 class Player():
     '''Class representing the snake'''
     def __init__(self, arena_rect, snake_size):
+        '''constructor for Player class
+        
+        args:
+        
+        arena_rect -- rect of the playable surface
+        snake_size -- size of on snake block'''
         # head looks different than body
         self.head_img = pygame.Surface((snake_size,snake_size))
         self.head_img.fill('Yellow')
@@ -67,10 +73,12 @@ class Player():
             if self.y_change != -20:
                 self.x_change = 0
                 self.y_change = 20
+        # move left
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             if self.x_change != 20:
                 self.x_change = -20
                 self.y_change = 0
+        # move right
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             if self.x_change != -20:
                 self.x_change = 20
@@ -83,7 +91,6 @@ class Player():
 
             food_rect -- Rect of the food just collected (important to get the position of the new bodypart)
             '''
-    
         # get corr of the food
         x_corr = food_rect.center[0]
         y_corr = food_rect.center[1]
@@ -92,8 +99,7 @@ class Player():
 
     def move(self):
         '''moves the whole snake further depending on the direction'''
-        # print("pre move head x = ", self.player_pos[0].x)
-        # print("body1 x = ", self.player_pos[1].x)
+        # helper variabels
         last_x = self.player_pos[0].x
         last_y = self.player_pos[0].y
         # head get's moved in moving direction
@@ -113,10 +119,10 @@ class Player():
         
         args:
         
-        arena_rect -- Rect of the arena played in
+        display -- object from class Display
         
         returns:
-        bool if the gamestate is still active or not'''
+        game_active -- bool if the gamestate is still active or not'''
         game_active = True
         # snake outside the arena?
         if (not display.arena_rect.contains(self.player_pos[0])):
@@ -125,13 +131,13 @@ class Player():
         for body in self.player_pos[1:]:
             if self.player_pos[0].center == body.center:
                 game_active = False
-                print("chrashed in body.")
+                #print("chrashed in body.")
         # snake touching walls?
         index = self.player_pos[0].collidelist(display.wall_rects)
         if index >= 0:
-            print(display.wall_rects[index], "PLayer pos: " , self.player_pos[0])
+            #print(display.wall_rects[index], "PLayer pos: " , self.player_pos[0])
             game_active = False
-            print("crashed in wall")
+            #print("crashed in wall")
         return game_active
         
     def draw(self, screen):
@@ -140,6 +146,7 @@ class Player():
         args:
         
         screen -- surface (where the player should be drawn on)'''
+        #helper functions for head and body
         self.update_head_image()
         self.update_tail_image()
         for index, part in enumerate(self.player_pos):

@@ -1,4 +1,3 @@
-from msilib.schema import Class
 import pygame
 from Maps import Maps
 from Button import Button
@@ -6,10 +5,17 @@ from Button import Button
 class Display():
     '''class to display and somewhat manage the components of the game'''
     def __init__(self, screen, helping, map=0):
+        '''constructor of Display class
+        
+        args:
+        
+        screen -- main screen of the game
+        helping -- bool if helping checker pattern should be drawn
+        map -- int corresponding to map selected'''
         # get walls of map
         self.map_nr = map
         walls = Maps(self.map_nr).get_walls()
-        # legned on the left
+        # legend on the left
         self.total_width, self.total_height = screen.get_size()
         self.legend_surf = pygame.Surface((self.total_width/6, self.total_height))
         self.legend_rect =self.legend_surf.get_rect(topleft=(0,0))
@@ -58,7 +64,7 @@ class Display():
         self.map5_button = Button(800, 650, self.map5_img, MAP_NAME(5).name)
 
     def update(self, screen):
-        '''funtion to display the defined elements
+        '''function to display the defined elements
         
         args:
         
@@ -76,6 +82,7 @@ class Display():
         screen -- surface to display time on
         start_time -- start time of pygame
         paused -- flag if game if pasued (time count shuld stop)
+        paused_timer -- time paused till now
         
         return:
         
@@ -97,14 +104,14 @@ class Display():
         args:
         
         screen -- surface to display score on
-        score -- curretn score of the game
+        score -- current score of the game
         '''
         score_surf = self.font.render(f'{score}', False, 'Black')
         score_rect = score_surf.get_rect(topleft=(40, self.score_text_rect.bottom+20))
         screen.blit(score_surf, score_rect)
 
     def start_screen(self, screen, score, time, flag, snake_speed):
-        '''function to display message after game over
+        '''function to display start or end screen
         
         args:
         
@@ -156,6 +163,7 @@ class Display():
             newevent = pygame.event.Event(pygame.KEYDOWN, unicode=" ", key=pygame.K_SPACE, mod=pygame.KMOD_NONE) #create the event
             pygame.event.post(newevent) #add the event to the queue
 
+        # display the player selection of map and difficulty
         map_text_surf = self.font.render(f'Your are playing   {MAP_NAME(self.map_nr).name}   next round on   {DIFF(snake_speed).name}!', False, 'Green')
         map_text_rect = map_text_surf.get_rect(center=(600,950))
         screen.blit(map_text_surf, map_text_rect)
@@ -163,6 +171,7 @@ class Display():
         return snake_speed
     
     def helping_blocks(self):
+        '''function to draw checker pattern of the arena'''
         gras_color = (56,94,12)
         for row in range(50):
             if row % 2 == 0:
@@ -176,7 +185,7 @@ class Display():
                         gras_rect = pygame.Rect(col*20,row*20,20,20)
                         pygame.draw.rect(self.arena_surf, gras_color, gras_rect)
 
-# enums for easyer printning/ handeling of names
+# enums for easier printing/ handling of names
 from enum import Enum
 class MAP_NAME(Enum):
     BASIC = 0
@@ -190,3 +199,4 @@ class DIFF(Enum):
     EASY = 150
     OKAY = 100
     HARD = 50
+

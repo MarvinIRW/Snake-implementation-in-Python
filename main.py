@@ -1,63 +1,12 @@
-from contextlib import nullcontext
-from time import process_time_ns
+# Imports for running the game
 import pygame
-from sys import exit # to savely close the game
-from random import randint
+from sys import exit # to safely close the game
 from Player import Player
 from Display import Display
 from Food import Food
 from PowerUp import PowerUp
 
-
-def initialization(map_selection, help_lines, snake_speed_local=100):
-    # start of the game, important for seconds of each game
-    global start_time
-    start_time = int(pygame.time.get_ticks() / 1000)
-    global pause_time_total
-    pause_time_total= 0
-    # score of one game
-    global score
-    score = 0
-    # determine how fast the snake is (later for difficulty?)
-    global snake_speed
-    snake_speed = snake_speed_local
-    pygame.time.set_timer(move_timer, snake_speed)
-    # reset power up timer
-    pygame.time.set_timer(power_appear_timer, 15000)
-    # helping lines?
-    global helping
-    helping = help_lines
-    # what map?
-    global map
-    map = map_selection
-    # initialise the display
-    global display
-    display = Display(screen, helping, map)
-    # player
-    global player
-    player = Player(display.arena_rect, snake_block)
-    # food
-    global food
-    food = Food(screen, snake_block, player.player_pos, display.wall_rects)
-    # power up
-    global power_up
-    del power_up
-    global power_on
-    power_on = False
-
-
-
-    # move the player to approximately the middle 
-    player.player_pos[0].update(720,500,player.player_pos[0].width, player.player_pos[0].height)
-    player.player_pos[1].update(720,520,player.player_pos[1].width, player.player_pos[1].height)
-    player.x_change = 0
-    player.y_change = -20
-
-    # start the game
-    global game_active
-    game_active = True
-
-# basically inistializes the pygame module
+# basically initializes the pygame module
 pygame.mixer.pre_init(44100,-16,2,512)
 pygame.init()
 # display surface
@@ -82,12 +31,12 @@ pause_time = 0
 pause_time_total= 0
 # score of one game
 score = 0
-# determine how fast the snake is (later for difficulty?)
+# determine how fast the snake is (corresponds to ms interval the snake moves)
 snake_speed = 100
 effected_speed = 0
 # helping lines?
 helping = True
-# initialise the display
+# initialize the display
 display = Display(screen, helping)
 # player
 player = Player(display.arena_rect, snake_block)
@@ -96,10 +45,6 @@ food = Food(screen, snake_block, player.player_pos, display.wall_rects)
 # powerup
 power_up = PowerUp(snake_block)
 power_on = False
-
-
-
-
 
 # timer for power ups popping up
 power_appear_timer = pygame.USEREVENT + 1
@@ -112,25 +57,82 @@ pygame.time.set_timer(move_timer, snake_speed)
 power_lasting_timer = pygame.USEREVENT + 3
 pygame.time.set_timer(power_lasting_timer, 3000)
 
+def initialization(map_selection, help_lines, snake_speed_local=100):
+    '''method to reset all important variables for the game
+    
+    args:
+    
+    map_selection -- int corresponding to the chosen map
+    help_lines -- if the Check pattern should be drawn (player selection not implemented)
+    snake_speed_local -- the chosen difficulty'''
+    # start of the game, important for seconds of each game
+    global start_time
+    start_time = int(pygame.time.get_ticks() / 1000)
+    global pause_time_total
+    pause_time_total= 0
+    # score of one game
+    global score
+    score = 0
+    # determine how fast the snake is
+    global snake_speed
+    snake_speed = snake_speed_local
+    pygame.time.set_timer(move_timer, snake_speed)
+    # reset power up timer
+    pygame.time.set_timer(power_appear_timer, 15000)
+    # helping lines?
+    global helping
+    helping = help_lines
+    # what map?
+    global map
+    map = map_selection
+    # initialize the display
+    global display
+    display = Display(screen, helping, map)
+    # player
+    global player
+    player = Player(display.arena_rect, snake_block)
+    # food
+    global food
+    food = Food(screen, snake_block, player.player_pos, display.wall_rects)
+    # power up
+    global power_up
+    # power up could not exist
+    try:
+        power_up
+    except NameError:
+        del power_up    
+    global power_on
+    power_on = False
 
+    # move the player to approximately the middle 
+    player.player_pos[0].update(720,500,player.player_pos[0].width, player.player_pos[0].height)
+    player.player_pos[1].update(720,520,player.player_pos[1].width, player.player_pos[1].height)
+    # set snake direction
+    player.x_change = 0
+    player.y_change = -20
 
+    # start the game
+    global game_active
+    game_active = True
+
+# main loop
 while True:
-    # this while loop shoulnd run faster than 60x per second (so max frame rate is 60)
+    # this while loop should not run faster 120x per second (so max frame rate is 120)
     clock.tick(120)
     # event loop
     for event in pygame.event.get():
         # so one can close the window with x-button
         if event.type == pygame.QUIT:
-            # kinda the opposit of pygame.init()
+            # kind of the opposite of pygame.init()
             pygame.quit()
-            # close the code savely
+            # close the code safely
             exit()
         # 'x' closes the game
         if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
             pygame.quit()
             exit()
 
-        # game pasued?
+        # game paused?
         if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
             paused = not paused
             # pause the game
@@ -140,7 +142,7 @@ while True:
             else:
                 pause_time = time - pause_time
                 pause_time_total += pause_time                
-        # movement
+        # movement, power up spawn
         if game_active and not paused:
             # check player input
             player.input()
@@ -148,7 +150,6 @@ while True:
             # movement timer
             if event.type == move_timer:
                 # check if snake hit the food
-                #score = player.eat(food, score, display.wall_rects)
                 score = food.eaten(player, score, display.wall_rects)
                 # check if snake hit powerup
                 if power_on:
@@ -166,20 +167,17 @@ while True:
                 pygame.time.set_timer(move_timer, snake_speed)
                 print("reset speed")
 
-            # power up timer adds a powerup to playingfield and
+            # power up timer adds a powerup to playing field and
             # relocates it if not picked up
             if event.type == power_appear_timer:
                 power_on = not power_on
                 if power_on:
                     power_up = PowerUp(snake_block)
                     power_up.deploy(player.player_pos, display.wall_rects, food.food_rect)
-                
-                
-
-                
 
         # input for menu
         else:
+            # if new game is started
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 # resets all important parameters
                 initialization(display.map_nr, helping, snake_speed_local=snake_speed)
@@ -192,7 +190,7 @@ while True:
         player.draw(screen)
         # draw the food
         food.draw(screen)
-        # draw the power up
+        # draw the power up if there is one
         if power_on:
             power_up.draw(screen)
         # display current time
@@ -200,7 +198,7 @@ while True:
         # display current score
         display.score(screen, score)
 
-    # if not in active game draw the start and end screen
+    # if not in active game draw the start or end screen
     else:
         # start screen
         if time == 0:
@@ -211,3 +209,4 @@ while True:
             
     # updates the screen(display surface)
     pygame.display.update()
+

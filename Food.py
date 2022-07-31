@@ -4,22 +4,32 @@ from random import randint
 class Food():
     '''class to represent the food in the main game'''
     def __init__(self, screen, snake_size, body_rects, wall_rects):
+        '''constructor for the food class
+        
+        args:
+        
+        screen -- main surface of the game
+        snake_size -- size of one snake block
+        body_rects -- list of snake rects
+        wall_rects -- list of wall rects'''
+        # leading surface and rect of food
         self.block_size = snake_size
         self.arena_width, self.arena_height = screen.get_size()
         self.food_surf = pygame.image.load('images/apple.png').convert_alpha()
         self.food_surf = pygame.transform.scale(self.food_surf, (snake_size, snake_size))
-        #self.food_surf = pygame.Surface((snake_size,snake_size))
         self.x_corr = randint(10, 59)*20
         self.y_corr = randint(0,49)*20
         self.food_rect = self.food_surf.get_rect(topleft=(self.x_corr, self.y_corr))
+        # check if food is in legal pos
         while(not self.food_legal(body_rects, wall_rects)):
             x_corr = randint(10, 59)*20
             y_corr = randint(0,49)*20
             self.food_rect.update(x_corr,y_corr, self.food_rect.width, self.food_rect.height)
-        #self.food_surf.fill('Red')
+        # sound for eating
         self.crunch_sound = pygame.mixer.Sound('sound/crunch.wav')
         
     def food_legal(self, body_rects, wall_rects):
+        '''checks if food is in a legal position'''
         if self.food_rect.collidelist(body_rects) >= 0 or self.food_rect.collidelist(wall_rects) >= 0:
             return False
         else:
@@ -30,14 +40,16 @@ class Food():
 
         args:
 
-        player_pos -- list of Rects of the snake positions
+        body_rects -- list of Rects of the snake positions
         arena_rect -- Rect of the arena
         '''
+        # get random position
         x_corr = randint(10, 59)*20
         y_corr = randint(0,49)*20
         self.food_rect.update(x_corr,y_corr, self.food_rect.width, self.food_rect.height)
         # corr's cant touch the snake itself - food can't spawn inside snake
         while(not self.food_legal(body_rects, wall_rects)):
+            # if illegal  move the food
             x_corr = randint(10, 59)*20
             y_corr = randint(0,49)*20
             self.food_rect.update(x_corr,y_corr, self.food_rect.width, self.food_rect.height)
@@ -51,7 +63,7 @@ class Food():
         score -- score of the game
         wall_rects -- list of wall rects in arena
         '''
-
+        
         if self.food_rect.colliderect(player.player_pos[0]):
             score += 1
             player.create_bodypart(self.food_rect)

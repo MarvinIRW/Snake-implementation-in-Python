@@ -3,6 +3,17 @@ import pygame
 class Button():
     '''class to represent a button'''
     def __init__(self, x, y, image, caption="", height=250, width=250, color=(0,128,0)):
+        '''constructor of class Button
+        
+        args:
+        
+        x -- top left x pos of button
+        y -- top left y pos of button
+        image -- image of the desired look of the button
+        caption -- string of the caption
+        height -- height of button
+        width -- width of button
+        color -- RGB tuple of int representing the color'''
         self.image = pygame.transform.scale(image, (int(height), int(width)))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x,y)
@@ -21,12 +32,12 @@ class Button():
         action = False
         # get mouse pos
         pos = pygame.mouse.get_pos()
-        # check mousover and clicked pos
+        # check mouseover and clicked pos
         if self.rect.collidepoint(pos):
             hover = self.rect.copy()
             hover.inflate_ip(20, 20)
             pygame.draw.rect(screen, 'Yellow', hover, border_radius=10)
-            # leftclick detected
+            # left-click detected
             if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
                 self.clicked = True
                 action = True
@@ -37,3 +48,4 @@ class Button():
         screen.blit(self.caption_surf, self.caption_rect)
 
         return action
+
