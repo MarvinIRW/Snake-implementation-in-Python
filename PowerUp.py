@@ -76,12 +76,10 @@ class PowerUp():
         if self.power_rect.colliderect(head):
             if self.power == POWER_EFFECT.SLOW:
                 self.power_slow(snake_speed, move_timer, power_lasting_timer, power_appear_timer)
-                print("set timer")
                 self.play_sound()
                 return False, True
             elif self.power.value == POWER_EFFECT.FAST.value:
                 self.power_fast(snake_speed, move_timer, power_lasting_timer, power_appear_timer)
-                print("set timer")
                 self.play_sound()
                 return False, True
         # if not

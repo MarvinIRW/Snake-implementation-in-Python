@@ -167,7 +167,6 @@ while True:
                 effected_speed = 0
                 # and adjust snake speed 
                 pygame.time.set_timer(move_timer, snake_speed)
-                print("reset speed")
                 power_took = False
 
             # power up timer adds a powerup to playing field and
