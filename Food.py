@@ -63,7 +63,6 @@ class Food():
         score -- score of the game
         wall_rects -- list of wall rects in arena
         '''
-        
         if self.food_rect.colliderect(player.player_pos[0]):
             score += 1
             player.create_bodypart(self.food_rect)

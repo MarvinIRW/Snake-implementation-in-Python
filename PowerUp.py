@@ -70,6 +70,7 @@ class PowerUp():
         returns:
         
         power_on -- flag in main game to display power-up
+        power_took -- flag for power up taking
         '''
         # if power up is picked up
         if self.power_rect.colliderect(head):
@@ -77,14 +78,14 @@ class PowerUp():
                 self.power_slow(snake_speed, move_timer, power_lasting_timer, power_appear_timer)
                 print("set timer")
                 self.play_sound()
-                return False
+                return False, True
             elif self.power.value == POWER_EFFECT.FAST.value:
                 self.power_fast(snake_speed, move_timer, power_lasting_timer, power_appear_timer)
                 print("set timer")
                 self.play_sound()
-                return False
+                return False, True
         # if not
-        return True
+        return True, False
 
     def power_slow(self, snake_speed, move_timer, power_lasting_timer, power_appear_timer):
         '''sets appropriate timers for the slowdown of the snake'''

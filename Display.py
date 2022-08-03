@@ -138,7 +138,26 @@ class Display():
             score_message_surf = self.font.render(f'your score was: {score}  you played {time}  seconds', False, 'Green')
             score_message_rect = score_message_surf.get_rect(center=(self.total_width/2, self.total_height/20))
             screen.blit(score_message_surf, score_message_rect)
-
+        # keep the glowing if a map is clicked
+        if self.map_nr == 0:
+            self.map0_button.glow(screen)
+        if self.map_nr == 1:
+            self.map1_button.glow(screen)
+        if self.map_nr == 2:
+            self.map2_button.glow(screen)
+        if self.map_nr == 3:
+            self.map3_button.glow(screen)
+        if self.map_nr == 4:
+            self.map4_button.glow(screen)
+        if self.map_nr == 5:
+            self.map5_button.glow(screen)
+        
+        if snake_speed == 150:
+            self.easy_button.glow(screen)
+        if snake_speed == 100:
+            self.okay_button.glow(screen)
+        if snake_speed == 50:
+            self.hard_button.glow(screen)
         # draw and react to buttons
         if self.map0_button.draw(screen):
             self.map_nr = 0
@@ -152,6 +171,7 @@ class Display():
             self.map_nr = 4
         if self.map5_button.draw(screen):
             self.map_nr = 5
+        
         if self.easy_button.draw(screen):
             snake_speed = 150
         if self.okay_button.draw(screen):
@@ -166,6 +186,7 @@ class Display():
         # display the player selection of map and difficulty
         map_text_surf = self.font.render(f'Your are playing   {MAP_NAME(self.map_nr).name}   next round on   {DIFF(snake_speed).name}!', False, 'Green')
         map_text_rect = map_text_surf.get_rect(center=(600,950))
+        
         screen.blit(map_text_surf, map_text_rect)
         
         return snake_speed

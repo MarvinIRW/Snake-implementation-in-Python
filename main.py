@@ -45,6 +45,7 @@ food = Food(screen, snake_block, player.player_pos, display.wall_rects)
 # powerup
 power_up = PowerUp(snake_block)
 power_on = False
+power_took = False
 
 # timer for power ups popping up
 power_appear_timer = pygame.USEREVENT + 1
@@ -103,6 +104,7 @@ def initialization(map_selection, help_lines, snake_speed_local=100):
         del power_up    
     global power_on
     power_on = False
+    power_took = False
 
     # move the player to approximately the middle 
     player.player_pos[0].update(720,500,player.player_pos[0].width, player.player_pos[0].height)
@@ -153,19 +155,20 @@ while True:
                 score = food.eaten(player, score, display.wall_rects)
                 # check if snake hit powerup
                 if power_on:
-                    power_on = power_up.snake_on_power(player.player_pos[0], snake_speed, move_timer, power_lasting_timer, power_appear_timer)
+                    power_on, power_took = power_up.snake_on_power(player.player_pos[0], snake_speed, move_timer, power_lasting_timer, power_appear_timer)
                 # actually get the snake moving
                 player.move()
                 # check if the game is lost (doing it here cause just after movement one need to check the collision)
                 game_active = player.collosion(display)
 
             # if timer for power up duarion is over:
-            if event.type == power_lasting_timer:
+            if event.type == power_lasting_timer and power_took:
                 # set effected speed back to 0
                 effected_speed = 0
                 # and adjust snake speed 
                 pygame.time.set_timer(move_timer, snake_speed)
                 print("reset speed")
+                power_took = False
 
             # power up timer adds a powerup to playing field and
             # relocates it if not picked up

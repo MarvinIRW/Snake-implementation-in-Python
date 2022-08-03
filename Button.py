@@ -34,9 +34,8 @@ class Button():
         pos = pygame.mouse.get_pos()
         # check mouseover and clicked pos
         if self.rect.collidepoint(pos):
-            hover = self.rect.copy()
-            hover.inflate_ip(20, 20)
-            pygame.draw.rect(screen, 'Yellow', hover, border_radius=10)
+            # glowing
+            self.glow(screen, 'Yellow')
             # left-click detected
             if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
                 self.clicked = True
@@ -46,6 +45,11 @@ class Button():
         # draw rect on screen
         screen.blit(self.image, self.rect)
         screen.blit(self.caption_surf, self.caption_rect)
-
         return action
+
+    def glow(self, screen, glow_color=(30,180,50)):
+        '''funktion to get a 'glowing' border around the button'''
+        hover = self.rect.copy()
+        hover.inflate_ip(20, 20)
+        pygame.draw.rect(screen, glow_color, hover, border_radius=10)
 

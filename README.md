@@ -12,12 +12,12 @@ Eat appeals, get long, use power-ups if so desired and try to get a high score i
 
 ### Dependencies
 
-* Python with the following libraries: (tested on Python 3.10.4 and pygame 2.1.2)
-    * pygame
+* Python with the following libraries: (tested on Python 3.10.4)
+    * pygame (tested on pygame 2.1.2)
 
 ### Installing
 
-* clone the repository and run 'main.py'
+* clone or download the repository and run 'main.py'
 
 ## Authors
 
